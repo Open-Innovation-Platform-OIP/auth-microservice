@@ -310,6 +310,7 @@ exports.postLogin = async (req, res, next) => {
         token: jwt.sign(tokenContents, process.env.ENCRYPTION_KEY),
         id: user.id,
         is_verified: user.is_verified,
+        role: role
       });
     }
   })(req, res, next);
