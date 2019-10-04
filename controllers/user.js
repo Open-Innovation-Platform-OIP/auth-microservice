@@ -155,6 +155,16 @@ function completeSocialLogin(err, user) {
     if (user.is_admin) {
       role = "admin";
     }
+
+    if (!user.is_approved) {
+      console.log(user, "user");
+
+      return handleResponse(res, 401, {
+        type: "not-approved",
+        msg: "Your account has not been approved by an admin."
+      });
+    }
+
     const tokenContents = {
       sub: "" + user.id,
       name: user.email,
