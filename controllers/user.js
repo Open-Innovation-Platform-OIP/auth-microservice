@@ -1,25 +1,19 @@
-const {
-  promisify
-} = require('util');
-const passport = require('../config/passport');
-const {
-  User
-} = require('../db/schema');
-const {
-  errorHandler
-} = require('../db/errors');
-const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+const { promisify } = require("util");
+const passport = require("../config/passport");
+const { User } = require("../db/schema");
+const { errorHandler } = require("../db/errors");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const randomBytesAsync = promisify(crypto.randomBytes);
 
 const transporter = nodemailer.createTransport({
   // port: 587,
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: 'mail@jaaga.in',
-    pass: 'mail@jaaga'
+    user: "mail@jaaga.in",
+    pass: "mail@jaaga"
   },
   tls: {
     rejectUnauthorised: false
@@ -28,14 +22,14 @@ const transporter = nodemailer.createTransport({
 
 async function sendMail(req) {
   var mailOptions = {
-    from: 'mail@jaaga.in',
+    from: "mail@jaaga.in",
     to: req.to,
     subject: req.subject,
     text: req.text
   };
 
   return new Promise((resolve, reject) => {
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, function(error, info) {
       if (error) {
         // console.log(error);
         reject(error.response);
@@ -48,11 +42,10 @@ async function sendMail(req) {
 }
 
 function generateOTP() {
-
-  // Declare a digits variable  
-  // which stores all digits 
-  var digits = '0123456789';
-  let OTP = '';
+  // Declare a digits variable
+  // which stores all digits
+  var digits = "0123456789";
+  let OTP = "";
   for (let i = 0; i < 4; i++) {
     OTP += digits[Math.floor(Math.random() * 10)];
   }
@@ -61,11 +54,10 @@ function generateOTP() {
 
 async function sendVerificationCode(req, res) {
   try {
-    User
-      .query()
-      .where('email', req.body.email)
+    User.query()
+      .where("email", req.body.email)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         if (!user) {
           return res.status(500).send({
             msg: "User not found"
@@ -77,26 +69,30 @@ async function sendVerificationCode(req, res) {
           });
         }
         const otp = generateOTP();
-        await User.query()
-          .patchAndFetchById(user.id, {
-            otp: otp
-          });
+        await User.query().patchAndFetchById(user.id, {
+          otp: otp
+        });
         const mail = {
           to: user.email,
-          subject: 'Social Alpha Account Verification',
-          text: 'Hello,\n\n' + 'Please use the following OTP to change your password: ' + otp + '.\n'
+          subject: "Social Alpha Account Verification",
+          text:
+            "Hello,\n\n" +
+            "Please use the following OTP to change your password: " +
+            otp +
+            ".\n"
           // text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + 'social-alpha-open-innovation.firebaseapp.com' + '\/auth\/verify\/?email=' + user.email + '&otp=' + otp + '.\n'
-        }
+        };
         const response = await sendMail(mail);
         const msg = {
-          msg: 'A verification email has been sent to ' + user.email + '.'
-        }
+          msg: "A verification email has been sent to " + user.email + "."
+        };
         res.status(200).send(msg);
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
-      })
+      });
   } catch (err) {
     errorHandler(err, res);
     return;
@@ -105,11 +101,10 @@ async function sendVerificationCode(req, res) {
 
 async function sendPasswordResetCode(req, res) {
   try {
-    User
-      .query()
-      .where('email', req.body.email)
+    User.query()
+      .where("email", req.body.email)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         if (!user) {
           return res.status(500).send({
             msg: "User not found"
@@ -117,25 +112,29 @@ async function sendPasswordResetCode(req, res) {
         }
         const otp = generateOTP();
         // console.log(user, otp);
-        await User.query()
-          .patchAndFetchById(user.id, {
-            otp: otp
-          });
+        await User.query().patchAndFetchById(user.id, {
+          otp: otp
+        });
         const mail = {
           to: user.email,
-          subject: 'Social Alpha - Password Reset',
-          text: 'Hello,\n\n' + 'Please use the following OTP to change your password: ' + otp + '.\n'
+          subject: "Social Alpha - Password Reset",
+          text:
+            "Hello,\n\n" +
+            "Please use the following OTP to change your password: " +
+            otp +
+            ".\n"
         };
         const response = await sendMail(mail);
         const msg = {
-          msg: 'A password reset email has been sent to ' + user.email + '.'
-        }
+          msg: "A password reset email has been sent to " + user.email + "."
+        };
         res.status(200).send(msg);
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
-      })
+      });
   } catch (err) {
     errorHandler(err, res);
     return;
@@ -148,28 +147,36 @@ function completeSocialLogin(err, user) {
   // console.log(err, user);
   if (err) {
     res.writeHead(302, {
-      'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?err=' + err
+      Location: "https://app.socialalpha.jaagalabs.com/auth/login?err=" + err
     });
     res.end();
   }
   if (user) {
     if (user.is_admin) {
-      role = "admin"
+      role = "admin";
     }
     const tokenContents = {
-      sub: '' + user.id,
+      sub: "" + user.id,
       name: user.email,
       iat: Date.now() / 1000,
       "https://hasura.io/jwt/claims": {
         "x-hasura-allowed-roles": ["editor", "user", "mod", "admin"],
-        "x-hasura-user-id": '' + user.id,
+        "x-hasura-user-id": "" + user.id,
         "x-hasura-default-role": role,
         "x-hasura-role": role
       }
-    }
+    };
     const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
     res.writeHead(302, {
-      'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+      Location:
+        "https://app.socialalpha.jaagalabs.com/auth/login?token=" +
+        token +
+        "&email=" +
+        user.email +
+        "&id=" +
+        user.id +
+        "&role=" +
+        role
     });
     res.end();
   }
@@ -181,33 +188,41 @@ function completeSocialLogin(err, user) {
 exports.postGoogleLogin = async (req, res, next) => {
   let role = "user";
 
-  passport.authenticate('google', (err, user) => {
+  passport.authenticate("google", (err, user) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?err=' + err
+        Location: "https://app.socialalpha.jaagalabs.com/auth/login?err=" + err
       });
       res.end();
     }
     if (user) {
       if (user.is_admin) {
-        role = "admin"
+        role = "admin";
       }
       console.log(JSON.stringify(user));
       const tokenContents = {
-        sub: '' + user.id,
+        sub: "" + user.id,
         name: user.email,
         iat: Date.now() / 1000,
         "https://hasura.io/jwt/claims": {
           "x-hasura-allowed-roles": ["editor", "user", "mod", "admin"],
-          "x-hasura-user-id": '' + user.id,
+          "x-hasura-user-id": "" + user.id,
           "x-hasura-default-role": role,
           "x-hasura-role": role
         }
-      }
+      };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+        Location:
+          "https://app.socialalpha.jaagalabs.com/auth/login?token=" +
+          token +
+          "&email=" +
+          user.email +
+          "&id=" +
+          user.id +
+          "&role=" +
+          role
       });
       res.end();
     }
@@ -220,33 +235,41 @@ exports.postGoogleLogin = async (req, res, next) => {
 exports.postLinkedinLogin = async (req, res, next) => {
   let role = "user";
 
-  passport.authenticate('linkedin', (err, user) => {
+  passport.authenticate("linkedin", (err, user) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?err=' + err
+        Location: "https://app.socialalpha.jaagalabs.com/auth/login?err=" + err
       });
       res.end();
     }
     if (user) {
       if (user.is_admin) {
-        role = "admin"
+        role = "admin";
       }
       console.log(JSON.stringify(user));
       const tokenContents = {
-        sub: '' + user.id,
+        sub: "" + user.id,
         name: user.email,
         iat: Date.now() / 1000,
         "https://hasura.io/jwt/claims": {
           "x-hasura-allowed-roles": ["editor", "user", "mod", "admin"],
-          "x-hasura-user-id": '' + user.id,
+          "x-hasura-user-id": "" + user.id,
           "x-hasura-default-role": role,
           "x-hasura-role": role
         }
-      }
+      };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+        Location:
+          "https://app.socialalpha.jaagalabs.com/auth/login?token=" +
+          token +
+          "&email=" +
+          user.email +
+          "&id=" +
+          user.id +
+          "&role=" +
+          role
       });
       res.end();
     }
@@ -259,47 +282,56 @@ exports.postLinkedinLogin = async (req, res, next) => {
  */
 exports.postLogin = async (req, res, next) => {
   let role = "user";
-  req.assert('email', 'Email cannot by empty').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('password', 'Password cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({
+  req.assert("email", "Email cannot by empty").notEmpty();
+  req.assert("email", "Email is not valid").isEmail();
+  req.assert("password", "Password cannot be blank").notEmpty();
+  req.sanitize("email").normalizeEmail({
     gmail_remove_dots: false
   });
   const errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).json({
-      'errors': errors
+      errors: errors
     });
   }
 
-  passport.authenticate('local', (err, user) => {
+  passport.authenticate("local", (err, user) => {
     if (err) {
       return handleResponse(res, 400, {
-        'msg': err
-      })
+        msg: err
+      });
     }
     if (!user.is_verified) {
       return handleResponse(res, 401, {
-        type: 'not-verified',
-        msg: 'Your account has not been verified.'
-      })
+        type: "not-verified",
+        msg: "Your account has not been verified."
+      });
+    }
+    console.log(user, "user 2");
+    if (!user.is_approved) {
+      console.log(user, "user");
+
+      return handleResponse(res, 401, {
+        type: "not-approved",
+        msg: "Your account has not been approved by an admin."
+      });
     }
     if (user) {
       if (user.is_admin) {
-        role = "admin"
+        role = "admin";
       }
       const tokenContents = {
-        sub: '' + user.id,
+        sub: "" + user.id,
         name: user.email,
         iat: Date.now() / 1000,
         "https://hasura.io/jwt/claims": {
           "x-hasura-allowed-roles": ["editor", "user", "mod", "admin"],
-          "x-hasura-user-id": '' + user.id,
+          "x-hasura-user-id": "" + user.id,
           "x-hasura-default-role": role,
           "x-hasura-role": role
         }
-      }
+      };
       // const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       // res.writeHead(302, {
       // 	'Location': 'http://localhost:4200/login?token=' + token + '&user=' + user.email + '&id=' + user.id
@@ -317,31 +349,32 @@ exports.postLogin = async (req, res, next) => {
   })(req, res, next);
 };
 
-
 /**
  * POST /signup
  * Create a new local account.
  */
 exports.postSignup = async (req, res, next) => {
-  req.assert('name', 'Name cannot be empty').notEmpty();
-  req.assert('email', 'Email cannot be empty').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
-  req.sanitize('email').normalizeEmail({
+  req.assert("name", "Name cannot be empty").notEmpty();
+  req.assert("email", "Email cannot be empty").notEmpty();
+  req.assert("email", "Email is not valid").isEmail();
+  req.assert("password", "Password must be at least 4 characters long").len(4);
+  req
+    .assert("confirmPassword", "Passwords do not match")
+    .equals(req.body.password);
+  req.sanitize("email").normalizeEmail({
     gmail_remove_dots: false
   });
   const errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).json({
-      'errors': errors
+      errors: errors
     });
   }
 
   try {
     await User.query()
-      .allowInsert('[email, password, name]')
+      .allowInsert("[email, password, name]")
       .insert({
         email: req.body.email,
         password: req.body.password,
@@ -360,16 +393,16 @@ exports.postSignup = async (req, res, next) => {
  * Create a new local account.
  */
 exports.getPasswordResetCode = async (req, res, next) => {
-  req.assert('email', 'Email cannot by empty').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.sanitize('email').normalizeEmail({
+  req.assert("email", "Email cannot by empty").notEmpty();
+  req.assert("email", "Email is not valid").isEmail();
+  req.sanitize("email").normalizeEmail({
     gmail_remove_dots: false
   });
   const errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).json({
-      'errors': errors
+      errors: errors
     });
   }
   // Send the verification email
@@ -381,28 +414,29 @@ exports.getPasswordResetCode = async (req, res, next) => {
  * Create a new password
  */
 exports.postPasswordChange = async (req, res, next) => {
-  req.assert('email', 'Email cannot by empty').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('otp', 'OTP cannot be empty').notEmpty();
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
-  req.sanitize('email').normalizeEmail({
+  req.assert("email", "Email cannot by empty").notEmpty();
+  req.assert("email", "Email is not valid").isEmail();
+  req.assert("otp", "OTP cannot be empty").notEmpty();
+  req.assert("password", "Password must be at least 4 characters long").len(4);
+  req
+    .assert("confirmPassword", "Passwords do not match")
+    .equals(req.body.password);
+  req.sanitize("email").normalizeEmail({
     gmail_remove_dots: false
   });
   const errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).json({
-      'errors': errors
+      errors: errors
     });
   }
   try {
-    User
-      .query()
-      .where('email', req.body.email)
-      .where('otp', req.body.otp)
+    User.query()
+      .where("email", req.body.email)
+      .where("otp", req.body.otp)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         // console.log(user);
         if (!user) {
           return res.status(500).send({
@@ -420,26 +454,29 @@ exports.postPasswordChange = async (req, res, next) => {
           const password = await bcrypt.hash(req.body.password, salt);
           // const createRandomToken = await randomBytesAsync(16).then(buf => buf.toString('hex'));
           // token = createRandomToken;
-          const updatedUser = await User.query()
-            .patchAndFetchById(user.id, {
-              password: password,
-              otp: null
-              // token: createRandomToken
-            });
+          const updatedUser = await User.query().patchAndFetchById(user.id, {
+            password: password,
+            otp: null
+            // token: createRandomToken
+          });
           console.log("id: ", updatedUser.id, updatedUser.email);
           const msg = {
-            msg: 'Password has been updated for user with email ' + user.email + '.'
-          }
+            msg:
+              "Password has been updated for user with email " +
+              user.email +
+              "."
+          };
           res.status(200).send(msg);
         } catch (err) {
           errorHandler(err, res);
           return;
         }
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
-      })
+      });
   } catch (err) {
     errorHandler(err, res);
     return;
@@ -451,16 +488,16 @@ exports.postPasswordChange = async (req, res, next) => {
  * Create a email verification request.
  */
 exports.getVerificationCode = async (req, res, next) => {
-  req.assert('email', 'Email cannot by empty').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.sanitize('email').normalizeEmail({
+  req.assert("email", "Email cannot by empty").notEmpty();
+  req.assert("email", "Email is not valid").isEmail();
+  req.sanitize("email").normalizeEmail({
     gmail_remove_dots: false
   });
   const errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).json({
-      'errors': errors
+      errors: errors
     });
   }
   // Send the verification email
@@ -473,9 +510,9 @@ exports.getVerificationCode = async (req, res, next) => {
  */
 
 exports.completeVerification = async (req, res, next) => {
-  req.assert('email', 'Email cannot be empty').notEmpty();
-  req.assert('otp', 'OTP cannot be empty').notEmpty();
-  req.sanitize('email').normalizeEmail({
+  req.assert("email", "Email cannot be empty").notEmpty();
+  req.assert("otp", "OTP cannot be empty").notEmpty();
+  req.sanitize("email").normalizeEmail({
     gmail_remove_dots: false
   });
   // req.assert('password', 'Password must be at least 4 characters long').len(4);
@@ -485,17 +522,16 @@ exports.completeVerification = async (req, res, next) => {
 
   if (errors) {
     return res.status(400).json({
-      'errors': errors
+      errors: errors
     });
   }
   // console.log(req.query.email, req.query.token);
   try {
-    User
-      .query()
-      .where('email', req.body.email)
-      .where('otp', req.body.otp)
+    User.query()
+      .where("email", req.body.email)
+      .where("otp", req.body.otp)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         // console.log(user);
         if (!user) {
           return res.status(500).send({
@@ -514,16 +550,23 @@ exports.completeVerification = async (req, res, next) => {
         // }
         // user.is_verified = true;
         try {
-          const updatedUser = await User
-            .query()
-            .patchAndFetchById(user.id, {
-              is_verified: true,
-              otp: null
-            });
-          console.log("id:", updatedUser.id, updatedUser.email, "verified:", updatedUser.is_verified);
+          const updatedUser = await User.query().patchAndFetchById(user.id, {
+            is_verified: true,
+            otp: null
+          });
+          console.log(
+            "id:",
+            updatedUser.id,
+            updatedUser.email,
+            "verified:",
+            updatedUser.is_verified
+          );
           const msg = {
-            msg: 'User with email ' + user.email + 'has been successfully verified.'
-          }
+            msg:
+              "User with email " +
+              user.email +
+              "has been successfully verified."
+          };
           res.status(200).send(msg);
           // res.status(200).send('<html><body>User with email ' + user.email + ' has been verified.Click <a href="/">here to login</a>.</body></html>');
           // return res.redirect('/auth/login?');
@@ -532,17 +575,17 @@ exports.completeVerification = async (req, res, next) => {
             msg: e.message
           });
         }
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
-      })
+      });
   } catch (err) {
     errorHandler(err, res);
     return;
   }
 };
-
 
 function handleResponse(res, code, statusMsg) {
   res.status(code).json(statusMsg);
