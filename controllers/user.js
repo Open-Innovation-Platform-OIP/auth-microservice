@@ -217,11 +217,13 @@ exports.postGoogleLogin = async (req, res, next) => {
 
       if (!user.is_approved) {
         console.log(user, "user");
+        let error = "User is not approved";
 
-        return handleResponse(res, 401, {
-          type: "not-approved",
-          msg: "Your account has not been approved by an admin."
+        res.writeHead(302, {
+          Location:
+            "https://app.socialalpha.jaagalabs.com/auth/login?err=" + error
         });
+        res.end();
       }
 
       console.log(JSON.stringify(user));
@@ -276,11 +278,13 @@ exports.postLinkedinLogin = async (req, res, next) => {
 
       if (!user.is_approved) {
         console.log(user, "user");
+        let error = "User is not approved";
 
-        return handleResponse(res, 401, {
-          type: "not-approved",
-          msg: "Your account has not been approved by an admin."
+        res.writeHead(302, {
+          Location:
+            "https://app.socialalpha.jaagalabs.com/auth/login?err=" + error
         });
+        res.end();
       }
       console.log(JSON.stringify(user));
       const tokenContents = {
