@@ -156,6 +156,8 @@ function completeSocialLogin(err, user) {
       role = "admin";
     }
 
+    console.log(user, "user");
+
     if (!user.is_approved) {
       console.log(user, "user");
 
@@ -210,6 +212,8 @@ exports.postGoogleLogin = async (req, res, next) => {
       if (user.is_admin) {
         role = "admin";
       }
+
+      console.log(user, "user");
 
       if (!user.is_approved) {
         console.log(user, "user");
@@ -267,6 +271,8 @@ exports.postLinkedinLogin = async (req, res, next) => {
       if (user.is_admin) {
         role = "admin";
       }
+
+      console.log(user, "user");
 
       if (!user.is_approved) {
         console.log(user, "user");
