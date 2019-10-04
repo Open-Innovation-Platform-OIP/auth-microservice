@@ -200,6 +200,16 @@ exports.postGoogleLogin = async (req, res, next) => {
       if (user.is_admin) {
         role = "admin";
       }
+
+      if (!user.is_approved) {
+        console.log(user, "user");
+
+        return handleResponse(res, 401, {
+          type: "not-approved",
+          msg: "Your account has not been approved by an admin."
+        });
+      }
+
       console.log(JSON.stringify(user));
       const tokenContents = {
         sub: "" + user.id,
@@ -246,6 +256,15 @@ exports.postLinkedinLogin = async (req, res, next) => {
     if (user) {
       if (user.is_admin) {
         role = "admin";
+      }
+
+      if (!user.is_approved) {
+        console.log(user, "user");
+
+        return handleResponse(res, 401, {
+          type: "not-approved",
+          msg: "Your account has not been approved by an admin."
+        });
       }
       console.log(JSON.stringify(user));
       const tokenContents = {
