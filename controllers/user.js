@@ -330,7 +330,9 @@ exports.postLogin = async (req, res, next) => {
 
   if (errors) {
     return res.status(400).json({
-      errors: errors
+      errors: errors,
+      test: "test"
+
     });
   }
 
