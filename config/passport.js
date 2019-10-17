@@ -93,16 +93,16 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
             return done(err, null);
           }
         } else {
-          // if (!user.photo_url || !user.photo_url['url']) {
-          //   const photo_url = {
-          //     key: 'profile.jpg',
-          //     url: profile.photos[0].value
-          //   }
-          //   const updatedUser = await User.query()
-          //     .patchAndFetchById(user.id, {
-          //       photo_url: JSON.stringify(photo_url),
-          //     });
-          // }
+          if (!user.photo_url && !user.photo_url['url']) {
+            const photo_url = {
+              key: 'profile.jpg',
+              url: profile.photos[0].value
+            }
+            const updatedUser = await User.query()
+              .patchAndFetchById(user.id, {
+                photo_url: JSON.stringify(photo_url),
+              });
+          }
           if (!user.name) {
             const updatedUser = await User.query()
               .patchAndFetchById(user.id, {
