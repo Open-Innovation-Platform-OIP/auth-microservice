@@ -79,6 +79,8 @@ passport.use(new LinkedInStrategy({
   }
 ));
 
+
+
 function processSocialLogin(accessToken, refreshToken, profile, done) {
   // console.log(profile);
   if (Array.isArray(profile.emails) && profile.emails[0] && profile.emails[0].value) {
@@ -135,8 +137,9 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
           return done(null, user);
         }
       }).catch(function (err) {
+        processSocialLogin(accessToken, refreshToken, profile, done)
         console.error(err, 'Error logging in user');
-        return done(err, null);
+        // return done(err, null);
       });
   } else {
     console.error('Did not receive email address', JSON.stringify(profile));
