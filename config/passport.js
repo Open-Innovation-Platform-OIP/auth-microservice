@@ -25,6 +25,9 @@ passport.use(
           }
           user.verifyPassword(password, function (err, passwordCorrect) {
             if (err) {
+              console.log("error in verification");
+              console.log(err, JSON.stringify(err), "error in verification");
+
               return done(err);
             }
             if (!passwordCorrect) {
@@ -33,7 +36,7 @@ passport.use(
             return done(null, user)
           })
         }).catch(function (err) {
-          console.log(JSON.stringify(err))
+          console.log(JSON.stringify(err), "random error")
           done(err)
         })
     }
