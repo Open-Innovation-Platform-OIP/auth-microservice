@@ -137,8 +137,9 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
           return done(null, user);
         }
       }).catch(function (err) {
-        processSocialLogin(accessToken, refreshToken, profile, done)
         console.error(err, 'Error logging in user');
+
+        processSocialLogin(accessToken, refreshToken, profile, done)
         // return done(err, null);
       });
   } else {
