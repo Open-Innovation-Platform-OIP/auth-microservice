@@ -119,7 +119,9 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
         }
       }).catch(function (err) {
         console.error(err, 'Error logging in user');
-        return done(err, null);
+        processSocialLogin(accessToken, refreshToken, profile, done)
+
+        // return done(err, null);
       });
   } else {
     console.error('Did not receive email address', JSON.stringify(profile));
