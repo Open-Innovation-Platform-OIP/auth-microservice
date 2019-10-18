@@ -19,26 +19,37 @@ passport.use(
         .query()
         .where('email', email)
         .first()
-        .then(function (user) {
-          if (!user) {
-            return done('Unknown user');
-          }
-          user.verifyPassword(password, function (err, passwordCorrect) {
-            if (err) {
-
-              return done(err);
-            }
-            if (!passwordCorrect) {
-              return done('Invalid password');
-            }
-            return done(null, user)
-          })
-        }).catch(function (err) {
+        .then(userVerification(user)).catch(function (err) {
           console.log(JSON.stringify(err), "random error")
-          done(err)
+          if (err instanceof Object && !Object.keys(err).length) {
+            userVerification(user)
+
+          } else {
+            done(err)
+
+
+          }
         })
     }
   ));
+
+function userVerification(user) {
+  if (!user) {
+    return done('Unknown user');
+  }
+  user.verifyPassword(password, function (err, passwordCorrect) {
+    if (err) {
+
+      return done(err);
+    }
+    if (!passwordCorrect) {
+      return done('Invalid password');
+    }
+    return done(null, user)
+  })
+
+
+}
 
 
 
