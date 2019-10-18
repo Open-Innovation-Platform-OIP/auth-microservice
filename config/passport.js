@@ -41,7 +41,7 @@ passport.use(
 passport.use(new GoogleStrategy({
     clientID: "564870927448-d96u97cj6pcfui6l800sbhsbq6ab12kj.apps.googleusercontent.com",
     clientSecret: "uZey9Ql_8WFUlH-uRXpmBtnw",
-    callbackURL: "https://auth.socialalpha.jaagalabs.com/auth/google/callback",
+    callbackURL: "https://sa-auth-deploy.dev.jaagalabs.com/auth/google/callback",
     accessType: 'offline',
     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
   },
@@ -53,7 +53,7 @@ passport.use(new GoogleStrategy({
 passport.use(new LinkedInStrategy({
     clientID: "81w4duzaa545xj",
     clientSecret: "wHaoduznJvmGqrhO",
-    callbackURL: "https://auth.socialalpha.jaagalabs.com/auth/linkedin/callback",
+    callbackURL: "https://sa-auth-deploy.dev.jaagalabs.com/auth/linkedin/callback",
     scope: ['r_emailaddress', 'r_liteprofile'],
     state: true
   },
