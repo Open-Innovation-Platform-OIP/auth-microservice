@@ -148,7 +148,7 @@ function completeSocialLogin(err, user) {
   // console.log(err, user);
   if (err) {
     res.writeHead(302, {
-      'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?err=' + err
+      'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?err=' + err
     });
     res.end();
   }
@@ -169,7 +169,7 @@ function completeSocialLogin(err, user) {
     }
     const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
     res.writeHead(302, {
-      'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+      'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
     });
     res.end();
   }
@@ -185,7 +185,7 @@ exports.postGoogleLogin = async (req, res, next) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?err=' + err
+        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?err=' + err
       });
       res.end();
     }
@@ -207,7 +207,7 @@ exports.postGoogleLogin = async (req, res, next) => {
       }
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
       });
       res.end();
     }
@@ -224,7 +224,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?err=' + err
+        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?err=' + err
       });
       res.end();
     }
@@ -246,7 +246,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
       }
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        'Location': 'https://app.socialalpha.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
       });
       res.end();
     }
