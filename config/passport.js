@@ -33,6 +33,7 @@ passport.use(
             return done(null, user)
           })
         }).catch(function (err) {
+          console.log(JSON.stringify(err))
           done(err)
         })
     }
