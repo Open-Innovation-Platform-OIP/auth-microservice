@@ -15,28 +15,45 @@ passport.use(
       passwordField: 'password'
     },
     function (email, password, done) {
-      User
-        .query()
-        .where('email', email)
-        .first()
-        .then(function (user) {
-          if (!user) {
-            return done('Unknown user');
-          }
-          user.verifyPassword(password, function (err, passwordCorrect) {
-            if (err) {
-              return done(err);
-            }
-            if (!passwordCorrect) {
-              return done('Invalid password');
-            }
-            return done(null, user)
-          })
-        }).catch(function (err) {
-          done(err)
-        })
+      userVerification(email, password, done)
     }
   ));
+
+function userVerification(email, password, done) {
+  User
+    .query()
+    .where('email', email)
+    .first()
+    .then(function (user) {
+      if (!user) {
+        return done('Unknown user');
+      }
+      user.verifyPassword(password, function (err, passwordCorrect) {
+        if (err) {
+
+          return done(err);
+        }
+        if (!passwordCorrect) {
+          return done('Invalid password');
+        }
+        return done(null, user)
+      })
+
+    }).catch(function (err) {
+      console.log(JSON.stringify(err), "random error")
+      if (err instanceof Object && !Object.keys(err).length) {
+        userVerification(email, password, done)
+
+      } else {
+        done(err)
+
+
+      }
+    })
+
+}
+
+
 
 passport.use(new GoogleStrategy({
     clientID: "564870927448-d96u97cj6pcfui6l800sbhsbq6ab12kj.apps.googleusercontent.com",
@@ -61,6 +78,8 @@ passport.use(new LinkedInStrategy({
     processSocialLogin(accessToken, refreshToken, profile, done)
   }
 ));
+
+
 
 function processSocialLogin(accessToken, refreshToken, profile, done) {
   // console.log(profile);
@@ -93,7 +112,7 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
             return done(err, null);
           }
         } else {
-          if (!user.photo_url || !user.photo_url['url']) {
+          if (!user.photo_url && !user.photo_url['url']) {
             const photo_url = {
               key: 'profile.jpg',
               url: profile.photos[0].value
