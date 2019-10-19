@@ -162,14 +162,14 @@ function completeSocialLogin(err, user) {
 
     console.log(user, "user");
 
-    if (!user.is_approved) {
-      console.log(user, "user");
+    // if (!user.is_approved) {
+    //   console.log(user, "user");
 
-      return handleResponse(res, 401, {
-        type: "not-approved",
-        msg: "Your account has not been approved by an admin."
-      });
-    }
+    //   return handleResponse(res, 401, {
+    //     type: "not-approved",
+    //     msg: "Your account has not been approved by an admin."
+    //   });
+    // }
 
     const tokenContents = {
       sub: "" + user.id,
@@ -211,15 +211,15 @@ exports.postGoogleLogin = async (req, res, next) => {
 
       // console.log(user, "user");
 
-      if (!user.is_approved) {
-        // console.log(user, "user");
-        let error = "User is not approved";
+      // if (!user.is_approved) {
+      //   // console.log(user, "user");
+      //   let error = "User is not approved";
 
-        res.writeHead(302, {
-          Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
-        });
-        res.end();
-      }
+      //   res.writeHead(302, {
+      //     Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
+      //   });
+      //   res.end();
+      // }
 
       console.log(JSON.stringify(user));
       const tokenContents = {
@@ -263,15 +263,15 @@ exports.postLinkedinLogin = async (req, res, next) => {
 
       console.log(user, "user");
 
-      if (!user.is_approved) {
-        console.log(user, "user");
-        let error = "User is not approved";
+      // if (!user.is_approved) {
+      //   console.log(user, "user");
+      //   let error = "User is not approved";
 
-        res.writeHead(302, {
-          Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
-        });
-        res.end();
-      }
+      //   res.writeHead(302, {
+      //     Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
+      //   });
+      //   res.end();
+      // }
       console.log(JSON.stringify(user));
       const tokenContents = {
         sub: "" + user.id,
@@ -328,14 +328,14 @@ exports.postLogin = async (req, res, next) => {
       });
     }
     console.log(user, "user 2");
-    if (!user.is_approved) {
-      console.log(user, "user");
+    // if (!user.is_approved) {
+    //   console.log(user, "user");
 
-      return handleResponse(res, 401, {
-        type: "not-approved",
-        msg: "Your account has not been approved by an admin."
-      });
-    }
+    //   return handleResponse(res, 401, {
+    //     type: "not-approved",
+    //     msg: "Your account has not been approved by an admin."
+    //   });
+    // }
     if (user) {
       if (user.is_admin) {
         role = "admin";
