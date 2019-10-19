@@ -1,13 +1,7 @@
-const {
-  promisify
-} = require("util");
+const { promisify } = require("util");
 const passport = require("../config/passport");
-const {
-  User
-} = require("../db/schema");
-const {
-  errorHandler
-} = require("../db/errors");
+const { User } = require("../db/schema");
+const { errorHandler } = require("../db/errors");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -35,7 +29,7 @@ async function sendMail(req) {
   };
 
   return new Promise((resolve, reject) => {
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, function(error, info) {
       if (error) {
         // console.log(error);
         reject(error.response);
@@ -63,7 +57,7 @@ async function sendVerificationCode(req, res) {
     User.query()
       .where("email", req.body.email)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         if (!user) {
           return res.status(500).send({
             msg: "User not found"
@@ -81,7 +75,8 @@ async function sendVerificationCode(req, res) {
         const mail = {
           to: user.email,
           subject: "Social Alpha Account Verification",
-          text: "Hello,\n\n" +
+          text:
+            "Hello,\n\n" +
             "Please use the following OTP to change your password: " +
             otp +
             ".\n"
@@ -93,7 +88,7 @@ async function sendVerificationCode(req, res) {
         };
         res.status(200).send(msg);
       })
-      .catch(function (err) {
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
@@ -109,7 +104,7 @@ async function sendPasswordResetCode(req, res) {
     User.query()
       .where("email", req.body.email)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         if (!user) {
           return res.status(500).send({
             msg: "User not found"
@@ -123,7 +118,8 @@ async function sendPasswordResetCode(req, res) {
         const mail = {
           to: user.email,
           subject: "Social Alpha - Password Reset",
-          text: "Hello,\n\n" +
+          text:
+            "Hello,\n\n" +
             "Please use the following OTP to change your password: " +
             otp +
             ".\n"
@@ -134,7 +130,7 @@ async function sendPasswordResetCode(req, res) {
         };
         res.status(200).send(msg);
       })
-      .catch(function (err) {
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
@@ -184,7 +180,8 @@ function completeSocialLogin(err, user) {
     };
     const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
     res.writeHead(302, {
-      Location: "https://app.socialalpha.jaagalabs.com/auth/login?token=" +
+      Location:
+        "https://app.socialalpha.jaagalabs.com/auth/login?token=" +
         token +
         "&email=" +
         user.email +
@@ -221,6 +218,7 @@ exports.postGoogleLogin = async (req, res, next) => {
       if (!user.is_approved) {
         // console.log(user, "user");
         let error = "User is not approved";
+        console.log("test");
 
         res.writeHead(302, {
           Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
@@ -242,7 +240,8 @@ exports.postGoogleLogin = async (req, res, next) => {
       };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
+        Location:
+          "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
           token +
           "&email=" +
           user.email +
@@ -300,7 +299,8 @@ exports.postLinkedinLogin = async (req, res, next) => {
       };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
+        Location:
+          "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
           token +
           "&email=" +
           user.email +
@@ -332,7 +332,6 @@ exports.postLogin = async (req, res, next) => {
     return res.status(400).json({
       errors: errors,
       test: "test"
-
     });
   }
 
@@ -476,7 +475,7 @@ exports.postPasswordChange = async (req, res, next) => {
       .where("email", req.body.email)
       .where("otp", req.body.otp)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         // console.log(user);
         if (!user) {
           return res.status(500).send({
@@ -501,7 +500,8 @@ exports.postPasswordChange = async (req, res, next) => {
           });
           console.log("id: ", updatedUser.id, updatedUser.email);
           const msg = {
-            msg: "Password has been updated for user with email " +
+            msg:
+              "Password has been updated for user with email " +
               user.email +
               "."
           };
@@ -511,7 +511,7 @@ exports.postPasswordChange = async (req, res, next) => {
           return;
         }
       })
-      .catch(function (err) {
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
@@ -570,7 +570,7 @@ exports.completeVerification = async (req, res, next) => {
       .where("email", req.body.email)
       .where("otp", req.body.otp)
       .first()
-      .then(async function (user) {
+      .then(async function(user) {
         // console.log(user);
         if (!user) {
           return res.status(500).send({
@@ -601,7 +601,8 @@ exports.completeVerification = async (req, res, next) => {
             updatedUser.is_verified
           );
           const msg = {
-            msg: "User with email " +
+            msg:
+              "User with email " +
               user.email +
               "has been successfully verified."
           };
@@ -614,7 +615,7 @@ exports.completeVerification = async (req, res, next) => {
           });
         }
       })
-      .catch(function (err) {
+      .catch(function(err) {
         return res.status(500).send({
           msg: err.message
         });
