@@ -66,7 +66,7 @@ async function sendVerificationCode(req, res) {
       .then(async function (user) {
         if (!user) {
           return res.status(500).send({
-            msg: "User not found"
+            msg: "User is not found"
           });
         }
         if (user.is_verified) {
