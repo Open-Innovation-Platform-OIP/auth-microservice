@@ -368,7 +368,8 @@ exports.postSignup = async (req, res, next) => {
       .insert({
         email: req.body.email,
         password: req.body.password,
-        name: req.body.name
+        name: req.body.name,
+        photo_url: {}
       });
   } catch (err) {
     errorHandler(err, res);

@@ -121,7 +121,7 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
             return done(err, null);
           }
         } else {
-          if (!user.photo_url && !user.photo_url['url']) {
+          if (user && !user.photo_url && !user.photo_url['url']) {
             let photo_url;
             if (profile.photos && profile.photos[0]) {
 
