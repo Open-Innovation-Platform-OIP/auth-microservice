@@ -1,7 +1,13 @@
-const { promisify } = require("util");
+const {
+  promisify
+} = require("util");
 const passport = require("../config/passport");
-const { User } = require("../db/schema");
-const { errorHandler } = require("../db/errors");
+const {
+  User
+} = require("../db/schema");
+const {
+  errorHandler
+} = require("../db/errors");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -29,7 +35,7 @@ async function sendMail(req) {
   };
 
   return new Promise((resolve, reject) => {
-    transporter.sendMail(mailOptions, function(error, info) {
+    transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         // console.log(error);
         reject(error.response);
@@ -57,10 +63,10 @@ async function sendVerificationCode(req, res) {
     User.query()
       .where("email", req.body.email)
       .first()
-      .then(async function(user) {
+      .then(async function (user) {
         if (!user) {
           return res.status(500).send({
-            msg: "User not found"
+            msg: "User is not found"
           });
         }
         if (user.is_verified) {
@@ -75,8 +81,7 @@ async function sendVerificationCode(req, res) {
         const mail = {
           to: user.email,
           subject: "Social Alpha Account Verification",
-          text:
-            "Hello,\n\n" +
+          text: "Hello,\n\n" +
             "Please use the following OTP to change your password: " +
             otp +
             ".\n"
@@ -88,7 +93,7 @@ async function sendVerificationCode(req, res) {
         };
         res.status(200).send(msg);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         return res.status(500).send({
           msg: err.message
         });
@@ -104,7 +109,7 @@ async function sendPasswordResetCode(req, res) {
     User.query()
       .where("email", req.body.email)
       .first()
-      .then(async function(user) {
+      .then(async function (user) {
         if (!user) {
           return res.status(500).send({
             msg: "User not found"
@@ -118,8 +123,7 @@ async function sendPasswordResetCode(req, res) {
         const mail = {
           to: user.email,
           subject: "Social Alpha - Password Reset",
-          text:
-            "Hello,\n\n" +
+          text: "Hello,\n\n" +
             "Please use the following OTP to change your password: " +
             otp +
             ".\n"
@@ -130,7 +134,7 @@ async function sendPasswordResetCode(req, res) {
         };
         res.status(200).send(msg);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         return res.status(500).send({
           msg: err.message
         });
@@ -141,58 +145,7 @@ async function sendPasswordResetCode(req, res) {
   }
 }
 
-function completeSocialLogin(err, user) {
-  let role = "user";
 
-  // console.log(err, user);
-  if (err) {
-    res.writeHead(302, {
-      Location: "https://app.socialalpha.jaagalabs.com/auth/login?err=" + err
-    });
-    res.end();
-  }
-  if (user) {
-    if (user.is_admin) {
-      role = "admin";
-    }
-
-    console.log(user, "user");
-
-    if (!user.is_approved) {
-      console.log(user, "user");
-
-      return handleResponse(res, 401, {
-        type: "not-approved",
-        msg: "Your account has not been approved by an admin."
-      });
-    }
-
-    const tokenContents = {
-      sub: "" + user.id,
-      name: user.email,
-      iat: Date.now() / 1000,
-      "https://hasura.io/jwt/claims": {
-        "x-hasura-allowed-roles": ["editor", "user", "mod", "admin"],
-        "x-hasura-user-id": "" + user.id,
-        "x-hasura-default-role": role,
-        "x-hasura-role": role
-      }
-    };
-    const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
-    res.writeHead(302, {
-      Location:
-        "https://app.socialalpha.jaagalabs.com/auth/login?token=" +
-        token +
-        "&email=" +
-        user.email +
-        "&id=" +
-        user.id +
-        "&role=" +
-        role
-    });
-    res.end();
-  }
-}
 
 /**
  * Sign in with Google
@@ -204,7 +157,7 @@ exports.postGoogleLogin = async (req, res, next) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + err
+        'Location': 'https://oip-dev.dev.jaagalabs.com/auth/login?err=' + err
       });
       res.end();
     }
@@ -240,8 +193,7 @@ exports.postGoogleLogin = async (req, res, next) => {
       };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        Location:
-          "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
+        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
           token +
           "&email=" +
           user.email +
@@ -265,7 +217,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + err
+        'Location': 'https://oip-dev.dev.jaagalabs.com/auth/login?err=' + err
       });
       res.end();
     }
@@ -299,8 +251,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
       };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        Location:
-          "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
+        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
           token +
           "&email=" +
           user.email +
@@ -475,7 +426,7 @@ exports.postPasswordChange = async (req, res, next) => {
       .where("email", req.body.email)
       .where("otp", req.body.otp)
       .first()
-      .then(async function(user) {
+      .then(async function (user) {
         // console.log(user);
         if (!user) {
           return res.status(500).send({
@@ -500,8 +451,7 @@ exports.postPasswordChange = async (req, res, next) => {
           });
           console.log("id: ", updatedUser.id, updatedUser.email);
           const msg = {
-            msg:
-              "Password has been updated for user with email " +
+            msg: "Password has been updated for user with email " +
               user.email +
               "."
           };
@@ -511,7 +461,7 @@ exports.postPasswordChange = async (req, res, next) => {
           return;
         }
       })
-      .catch(function(err) {
+      .catch(function (err) {
         return res.status(500).send({
           msg: err.message
         });
@@ -570,7 +520,7 @@ exports.completeVerification = async (req, res, next) => {
       .where("email", req.body.email)
       .where("otp", req.body.otp)
       .first()
-      .then(async function(user) {
+      .then(async function (user) {
         // console.log(user);
         if (!user) {
           return res.status(500).send({
@@ -601,8 +551,7 @@ exports.completeVerification = async (req, res, next) => {
             updatedUser.is_verified
           );
           const msg = {
-            msg:
-              "User with email " +
+            msg: "User with email " +
               user.email +
               "has been successfully verified."
           };
@@ -615,7 +564,7 @@ exports.completeVerification = async (req, res, next) => {
           });
         }
       })
-      .catch(function(err) {
+      .catch(function (err) {
         return res.status(500).send({
           msg: err.message
         });
