@@ -82,7 +82,7 @@ passport.use(new LinkedInStrategy({
 
 
 function processSocialLogin(accessToken, refreshToken, profile, done) {
-  // console.log(profile);
+  console.log("profile===", profile);
   if (Array.isArray(profile.emails) && profile.emails[0] && profile.emails[0].value) {
     User
       .query()
