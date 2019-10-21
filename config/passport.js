@@ -91,11 +91,20 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
       .then(async function (user) {
         if (!user) {
           console.log('user signing up', profile);
+          let photo_url;
           try {
-            const photo_url = {
-              key: 'profile.jpg',
-              url: profile.photos[0].value
+            if (profile.photos && profile.photos[0]) {
+
+              photo_url = {
+                key: 'profile.jpg',
+                url: profile.photos[0].value
+              }
+            } else {
+              photo_url = {}
+
             }
+
+            // }
             const newUser = await User.query()
               .allowInsert('[email, password, name, photo_url, is_verified]')
               .insert({
@@ -113,10 +122,17 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
           }
         } else {
           if (!user.photo_url && !user.photo_url['url']) {
-            const photo_url = {
-              key: 'profile.jpg',
-              url: profile.photos[0].value
+            let photo_url;
+            if (profile.photos && profile.photos[0]) {
+
+              photo_url = {
+                key: 'profile.jpg',
+                url: profile.photos[0].value
+              }
+            } else {
+              photo_url = {}
             }
+
             const updatedUser = await User.query()
               .patchAndFetchById(user.id, {
                 photo_url: JSON.stringify(photo_url),
