@@ -271,17 +271,19 @@ exports.postLinkedinLogin = async (req, res, next) => {
 async function checkIfUserIsInvited(email) {
 
   let userIsInvited;
-  await InvitedUsers
+  userIsInvited = await InvitedUsers
     .query()
     .where('email', email)
     .first()
     .then(function (user) {
       if (!user) {
-        userIsInvited = false;
+        // userIsInvited = false;
+        return fasle
       } else {
         // console.log("User exists", user)
 
-        userIsInvited = true;
+        // userIsInvited = true;
+        return true
       }
 
     }).catch(function (err) {
