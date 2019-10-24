@@ -6,7 +6,7 @@ const {
   User
 } = require("../db/schema");
 const {
-  InvitedUser
+  InvitedUsers
 } = require("../db/invited_users_schema");
 const {
   errorHandler
@@ -269,7 +269,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
 };
 
 function queryTest(email) {
-  InvitedUser
+  InvitedUsers
     .query()
     .where('email', email)
     .first()
