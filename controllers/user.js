@@ -61,7 +61,7 @@ function generateOTP() {
   return OTP;
 }
 
-async function sendVerificationCode(req, res) {
+async function sendVerificationCode(req, res, adminInvited = false, isSignUp = false) {
   try {
     User.query()
       .where("email", req.body.email)
@@ -77,34 +77,58 @@ async function sendVerificationCode(req, res) {
             msg: "User is already verified"
           });
         }
-        const otp = generateOTP();
-        await User.query().patchAndFetchById(user.id, {
-          otp: otp
-        });
-        const mail = {
-          to: user.email,
-          subject: "Social Alpha Account Verification",
-          text: "Hello,\n\n" +
-            "Please use the following OTP to change your password: " +
-            otp +
-            ".\n"
-          // text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + 'social-alpha-open-innovation.firebaseapp.com' + '\/auth\/verify\/?email=' + user.email + '&otp=' + otp + '.\n'
-        };
-        const response = await sendMail(mail);
-        const msg = {
-          msg: "A verification email has been sent to " + user.email + "."
-        };
-        res.status(200).send(msg);
+
+        if (adminInvited && isSignUp) {
+          await User.query().patchAndFetchById(user.id, {
+            is_verified: true,
+            is_approved: true
+          });
+
+        } else if (!adminInvited && isSignUp) {
+          await User.query().patchAndFetchById(user.id, {
+            is_verified: true,
+            is_approved: false
+          });
+
+
+        }
+
+        if (!isSignUp) {
+
+          const otp = generateOTP();
+          await User.query().patchAndFetchById(user.id, {
+            otp: otp
+          });
+          const mail = {
+            to: user.email,
+            subject: "Social Alpha Account Verification",
+            text: "Hello,\n\n" +
+              "Please use the following OTP to change your password: " +
+              otp +
+              ".\n"
+            // text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + 'social-alpha-open-innovation.firebaseapp.com' + '\/auth\/verify\/?email=' + user.email + '&otp=' + otp + '.\n'
+          };
+          const response = await sendMail(mail);
+          const msg = {
+            msg: "A verification email has been sent to " + user.email + "."
+          };
+          res.status(200).send(msg);
+        }
       })
       .catch(function (err) {
         return res.status(500).send({
           msg: err.message
         });
       });
+
+
+
   } catch (err) {
     errorHandler(err, res);
     return;
   }
+
+
 }
 
 async function sendPasswordResetCode(req, res) {
@@ -270,7 +294,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
 
 async function checkIfUserIsInvited(email) {
 
-  let isUserInvited;
+
   let promise = new Promise((res, rej) => {
 
     InvitedUsers
@@ -285,7 +309,7 @@ async function checkIfUserIsInvited(email) {
           // console.log("User exists", user)
 
           // userIsInvited = true;
-          res(true)
+          res(user)
         }
 
       }).catch(function (err) {
@@ -297,8 +321,8 @@ async function checkIfUserIsInvited(email) {
 
   });
 
-  isUserInvited = await promise;
-  return isUserInvited;
+  result = await promise;
+  return result;
 
 
 
@@ -423,21 +447,34 @@ exports.postSignup = async (req, res, next) => {
     return;
   }
 
-  checkIfUserIsInvited(req.body.email).then(userIsInvited => {
+  // sendVerificationCode(req, res);
 
-    if (userIsInvited) {
+
+  checkIfUserIsInvited(req.body.email).then(val => {
+
+    if (val) {
+      if (val.admin_invited) {
+        sendVerificationCode(req, res, val.admin_nvited, true);
+
+      } else {
+        sendVerificationCode(req, res, false, true);
+
+      }
+
       return res.status(201).json({
         "message": "User created",
-        "is_invited": userIsInvited
+        "is_invited": true
 
       });
 
     } else {
+
       sendVerificationCode(req, res);
+
 
       res.status(201).json({
         "message": "User created",
-        "is_invited": userIsInvited
+        "is_invited": false
 
       });
     }
