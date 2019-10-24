@@ -423,24 +423,32 @@ exports.postSignup = async (req, res, next) => {
     return;
   }
 
-  const userIsInvited = checkIfUserIsInvited(req.body.email);
-  if (userIsInvited) {
-    return res.status(201).json({
-      "message": "User created",
-      "is_invited": userIsInvited
+  checkIfUserIsInvited(req.body.email).then(userIsInvited => {
 
-    });
+    if (userIsInvited) {
+      return res.status(201).json({
+        "message": "User created",
+        "is_invited": userIsInvited
 
-  } else {
-    sendVerificationCode(req, res);
+      });
 
-    res.status(201).json({
-      "message": "User created",
-      "is_invited": userIsInvited
+    } else {
+      sendVerificationCode(req, res);
 
-    });
+      res.status(201).json({
+        "message": "User created",
+        "is_invited": userIsInvited
 
-  }
+      });
+    }
+
+
+  }).catch(err => {
+    console.log(err)
+  });
+
+
+
   // console.log(userIsInvited, "user is invited");
   // Send the verification email
 };
