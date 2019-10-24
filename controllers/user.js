@@ -270,7 +270,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
 
 function checkIfUserIsInvited(email) {
 
-  InvitedUsers
+  const userIsInvited = InvitedUsers
     .query()
     .where('email', email)
     .first()
@@ -288,6 +288,8 @@ function checkIfUserIsInvited(email) {
       return false
 
     });
+
+  return userIsInvited;
 
 }
 
