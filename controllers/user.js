@@ -268,10 +268,10 @@ exports.postLinkedinLogin = async (req, res, next) => {
   })(req, res, next);
 };
 
-function checkIfUserIsInvited(email) {
+async function checkIfUserIsInvited(email) {
 
   let userIsInvited = false;
-  InvitedUsers
+  await InvitedUsers
     .query()
     .where('email', email)
     .first()
