@@ -453,8 +453,9 @@ exports.postSignup = async (req, res, next) => {
   checkIfUserIsInvited(req.body.email).then(val => {
 
     if (val) {
+      console.log(val);
       if (val.admin_invited) {
-        sendVerificationCode(req, res, val.admin_nvited, true);
+        sendVerificationCode(req, res, val.admin_invited, true);
 
       } else {
         sendVerificationCode(req, res, false, true);
