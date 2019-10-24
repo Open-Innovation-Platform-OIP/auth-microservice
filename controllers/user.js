@@ -268,22 +268,27 @@ exports.postLinkedinLogin = async (req, res, next) => {
   })(req, res, next);
 };
 
-function queryTest(email) {
+function checkIfUserIsInvited(email) {
+
   InvitedUsers
     .query()
     .where('email', email)
     .first()
     .then(function (user) {
       if (!user) {
-        return done('Unknown user');
+        return false;
       } else {
-        console.log("User exists", user)
+        // console.log("User exists", user)
+
+        return true;
       }
 
     }).catch(function (err) {
       console.log(JSON.stringify(err), "random error")
+      return false
 
-    })
+    });
+
 }
 
 /**
@@ -300,7 +305,7 @@ exports.postLogin = async (req, res, next) => {
   });
   const errors = req.validationErrors();
 
-  queryTest("vishnu@jaaga.in");
+  // queryTest("vishnu@jaaga.in");
 
 
 
@@ -402,6 +407,9 @@ exports.postSignup = async (req, res, next) => {
     errorHandler(err, res);
     return;
   }
+
+  const userIsInvited = checkIfUserIsInvited(req.body.email);
+  console.log(userIsInvited, "user is invited");
   // Send the verification email
   sendVerificationCode(req, res);
 };
