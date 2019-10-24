@@ -6,6 +6,9 @@ const {
   User
 } = require("../db/schema");
 const {
+  InvitedUser
+} = require("../db/invited_users_schema");
+const {
   errorHandler
 } = require("../db/errors");
 const jwt = require("jsonwebtoken");
@@ -265,6 +268,24 @@ exports.postLinkedinLogin = async (req, res, next) => {
   })(req, res, next);
 };
 
+function queryTest(email) {
+  InvitedUser
+    .query()
+    .where('email', email)
+    .first()
+    .then(function (user) {
+      if (!user) {
+        return done('Unknown user');
+      } else {
+        console.log("User exists", user)
+      }
+
+    }).catch(function (err) {
+      console.log(JSON.stringify(err), "random error")
+
+    })
+}
+
 /**
  * POST /login
  * Sign in using email and password.
@@ -279,12 +300,18 @@ exports.postLogin = async (req, res, next) => {
   });
   const errors = req.validationErrors();
 
+  queryTest("vishnu@jaaga.in");
+
+
+
+
   if (errors) {
     return res.status(400).json({
       errors: errors,
       test: "test"
     });
   }
+
 
   passport.authenticate("local", (err, user) => {
     if (err) {
