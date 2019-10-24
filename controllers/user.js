@@ -290,7 +290,7 @@ async function checkIfUserIsInvited(email) {
 
       }).catch(function (err) {
         console.log(JSON.stringify(err), "random error")
-        return false
+
 
       });
 
