@@ -301,11 +301,15 @@ async function checkIfUserIsInvited(email) {
       .query()
       .where('email', email)
       .first()
-      .then(function (user) {
+      .then(async function (user) {
         if (!user) {
           // userIsInvited = false;
           res(false)
         } else {
+
+          await InvitedUsers.query().patchAndFetchById(user.id, {
+            accepted: true
+          });
           // console.log("User exists", user)
 
           // userIsInvited = true;
@@ -456,9 +460,9 @@ exports.postSignup = async (req, res, next) => {
     if (val) {
       console.log(val, "user value invited")
 
-      InvitedUsers.query().patchAndFetchById(val.id, {
-        accepted: true
-      });
+      // InvitedUsers.query().patchAndFetchById(val.id, {
+      //   accepted: true
+      // });
 
       console.log(val);
       if (val.admin_invited) {
