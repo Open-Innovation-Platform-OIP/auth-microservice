@@ -292,7 +292,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
   })(req, res, next);
 };
 
-exports.checkIfUserIsInvited = async function (email) {
+async function checkIfUserIsInvited(email) {
 
 
   let promise = new Promise((res, rej) => {
@@ -705,4 +705,4 @@ function handleResponse(res, code, statusMsg) {
   res.status(code).json(statusMsg);
 }
 
-// module.exports.checkIfUserIsInvited = async checkIfUserIsInvited;
+module.exports.checkIfUserIsInvited = checkIfUserIsInvited;
