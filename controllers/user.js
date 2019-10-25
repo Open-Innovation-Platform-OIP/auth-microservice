@@ -454,13 +454,18 @@ exports.postSignup = async (req, res, next) => {
     let adminInvited;
 
     if (val) {
+
+      await InvitedUsers.query().patchAndFetchById(val.id, {
+        accepted: true
+      });
+
       console.log(val);
       if (val.admin_invited) {
         sendVerificationCode(req, res, val.admin_invited, true);
         adminInvited = true;
 
 
-      } else {
+      } else if (!val.admin_invited && val.user_invited) {
         sendVerificationCode(req, res, false, true);
         adminInvited = false;
 
