@@ -118,7 +118,7 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
               name: profile.displayName,
               is_verified: true
             }
-            userController.checkIfUserIsInvited(profile.emails[0].value).then(val => {
+            userController.checkIfUserIsInvited(profile.emails[0].value).then(async val => {
               if (val.admin_invited) {
                 userData.is_approved = true
               }
