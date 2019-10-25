@@ -454,6 +454,7 @@ exports.postSignup = async (req, res, next) => {
     let adminInvited;
 
     if (val) {
+      console.log(val, "user value invited")
 
       InvitedUsers.query().patchAndFetchById(val.id, {
         accepted: true
@@ -703,3 +704,5 @@ exports.completeVerification = async (req, res, next) => {
 function handleResponse(res, code, statusMsg) {
   res.status(code).json(statusMsg);
 }
+
+module.exports.checkIfUserIsInvited = checkIfUserIsInvited;

@@ -6,6 +6,11 @@ var crypto = require("crypto");
 const {
   User
 } = require('../db/schema');
+
+const userController = require('../controllers/user');
+
+
+
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var LinkedInStrategy = require('@sokratis/passport-linkedin-oauth2').Strategy;
 
@@ -18,6 +23,7 @@ passport.use(
       userVerification(email, password, done)
     }
   ));
+
 
 function userVerification(email, password, done) {
   User
@@ -105,17 +111,29 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
             }
 
             // }
-            const newUser = await User.query()
-              .allowInsert('[email, password, name, photo_url, is_verified]')
-              .insert({
-                email: profile.emails[0].value,
-                password: crypto.randomBytes(20).toString('hex'),
-                photo_url: JSON.stringify(photo_url),
-                name: profile.displayName,
-                is_verified: true
-              })
-              .returning('*');
-            return done(null, newUser);
+            let userData = {
+              email: profile.emails[0].value,
+              password: crypto.randomBytes(20).toString('hex'),
+              photo_url: JSON.stringify(photo_url),
+              name: profile.displayName,
+              is_verified: true
+            }
+            userController.checkIfUserIsInvited(profile.emails[0].value).then(val => {
+              if (val.admin_invited) {
+                userData.is_approved = true
+              }
+              const newUser = await User.query()
+                .allowInsert('[email, password, name, photo_url, is_verified]')
+                .insert(userData)
+                .returning('*');
+              return done(null, newUser);
+
+            }).catch(err => {
+              console.log(err)
+            })
+
+
+
           } catch (err) {
             console.error('user could not be added to db', err);
             return done(err, null);
