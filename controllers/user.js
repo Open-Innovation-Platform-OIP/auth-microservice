@@ -455,7 +455,7 @@ exports.postSignup = async (req, res, next) => {
 
     if (val) {
 
-      await InvitedUsers.query().patchAndFetchById(val.id, {
+      InvitedUsers.query().patchAndFetchById(val.id, {
         accepted: true
       });
 
