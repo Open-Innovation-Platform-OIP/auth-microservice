@@ -445,6 +445,20 @@ exports.postSignup = async (req, res, next) => {
         password: req.body.password,
         name: req.body.name,
         photo_url: {}
+      }).then(val => {
+        console.log(val);
+
+      }).catch(err => {
+        console.log("sign up error==", err)
+        // await User.query()
+        //   .allowInsert("[email, password, name]")
+        //   .insert({
+        //     email: req.body.email,
+        //     password: req.body.password,
+        //     name: req.body.name,
+        //     photo_url: {}
+        //   })
+
       });
   } catch (err) {
     errorHandler(err, res);

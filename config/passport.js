@@ -125,7 +125,11 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
               const newUser = await User.query()
                 .allowInsert('[email, password, name, photo_url, is_verified]')
                 .insert(userData)
-                .returning('*');
+                .returning('*').then(val => {
+                  console.log(val)
+                }).catch(err => {
+                  console.log("social signup error===", err)
+                });
               return done(null, newUser);
 
             }).catch(err => {
