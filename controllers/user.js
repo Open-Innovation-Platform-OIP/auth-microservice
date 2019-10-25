@@ -61,7 +61,7 @@ function generateOTP() {
   return OTP;
 }
 
-async function sendVerificationCode(req, res, adminInvited = false, isSignUp = false) {
+async function sendVerificationCode(req, res, adminInvited = false, isInviteeSignUp = false) {
   try {
     User.query()
       .where("email", req.body.email)
@@ -78,13 +78,13 @@ async function sendVerificationCode(req, res, adminInvited = false, isSignUp = f
           });
         }
 
-        if (adminInvited && isSignUp) {
+        if (adminInvited && isInviteeSignUp) {
           await User.query().patchAndFetchById(user.id, {
             is_verified: true,
             is_approved: true
           });
 
-        } else if (!adminInvited && isSignUp) {
+        } else if (!adminInvited && isInviteeSignUp) {
           await User.query().patchAndFetchById(user.id, {
             is_verified: true,
             is_approved: false
@@ -93,7 +93,7 @@ async function sendVerificationCode(req, res, adminInvited = false, isSignUp = f
 
         }
 
-        if (!isSignUp) {
+        if (!isInviteeSignUp) {
 
           const otp = generateOTP();
           await User.query().patchAndFetchById(user.id, {
@@ -465,7 +465,7 @@ exports.postSignup = async (req, res, next) => {
         adminInvited = true;
 
 
-      } else if (!val.admin_invited && val.user_invited) {
+      } else {
         sendVerificationCode(req, res, false, true);
         adminInvited = false;
 
