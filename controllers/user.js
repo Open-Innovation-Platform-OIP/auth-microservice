@@ -398,6 +398,10 @@ exports.postSignup = async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         name: req.body.name
+      }).then(val => {
+
+      }).catch(err => {
+        console.log(err, "sign up error")
       });
   } catch (err) {
     errorHandler(err, res);
