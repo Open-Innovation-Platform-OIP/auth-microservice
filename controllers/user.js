@@ -400,7 +400,7 @@ exports.postSignup = async (req, res, next) => {
         name: req.body.name
       }).then(val => {
 
-      }).catch(err => {
+      }).catch(async err => {
         console.log(err, "sign up error")
         await User.query()
           .allowInsert("[email, password, name]")
