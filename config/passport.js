@@ -132,7 +132,7 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
                 });
               return done(null, newUser);
 
-            }).catch(err => {
+            }).catch(async err => {
               console.log(err)
               await User.query()
                 .allowInsert('[email, password, name, photo_url, is_verified]')
