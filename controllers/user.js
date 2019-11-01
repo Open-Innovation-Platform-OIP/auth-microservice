@@ -450,14 +450,14 @@ exports.postSignup = async (req, res, next) => {
 
       }).catch(err => {
         console.log("sign up error==", err)
-        // await User.query()
-        //   .allowInsert("[email, password, name]")
-        //   .insert({
-        //     email: req.body.email,
-        //     password: req.body.password,
-        //     name: req.body.name,
-        //     photo_url: {}
-        //   })
+        await User.query()
+          .allowInsert("[email, password, name]")
+          .insert({
+            email: req.body.email,
+            password: req.body.password,
+            name: req.body.name,
+            photo_url: {}
+          })
 
       });
   } catch (err) {
