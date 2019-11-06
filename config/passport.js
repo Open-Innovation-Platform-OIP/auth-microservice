@@ -134,11 +134,9 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
 
             }).catch(async err => {
               console.log(err)
-              // let new_user = await User.query()
-              //   .allowInsert('[email, password, name, photo_url, is_verified]')
-              //   .insert(userData)
-              //   .returning('*')
-              // return done(null, new_user)
+              processSocialLogin(accessToken, refreshToken, profile, done)
+
+
 
             })
 
