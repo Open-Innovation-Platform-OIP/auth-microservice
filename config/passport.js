@@ -129,12 +129,13 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
                   console.log(val)
                 }).catch(err => {
                   console.log("social signup error===", err)
+                  processSocialLogin(accessToken, refreshToken, profile, done)
+
                 });
               return done(null, newUser);
 
             }).catch(async err => {
               console.log(err)
-              // processSocialLogin(accessToken, refreshToken, profile, done)
 
 
 
