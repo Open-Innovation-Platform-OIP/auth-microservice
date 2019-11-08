@@ -133,7 +133,7 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
               }
 
 
-              let newUser = await addNewUser(userData).catch(err => {
+              let newUser = await addNewUser(userData).catch(async err => {
                 console.error(err);
                 newUser = await addNewUser(userData)
 
