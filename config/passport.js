@@ -86,6 +86,15 @@ passport.use(new LinkedInStrategy({
 ));
 
 
+function addNewUser(userData) {
+  return User.query()
+    .allowInsert('[email, password, name, photo_url, is_verified]')
+    .insert(userData)
+    .returning('*')
+
+}
+
+
 
 function processSocialLogin(accessToken, refreshToken, profile, done) {
   console.log("profile===", profile);
@@ -122,16 +131,24 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
               if (val.admin_invited) {
                 userData.is_approved = true
               }
-              const newUser = await User.query()
-                .allowInsert('[email, password, name, photo_url, is_verified]')
-                .insert(userData)
-                .returning('*').then(val => {
-                  console.log(val)
-                }).catch(err => {
-                  console.log("social signup error===", err)
-                  processSocialLogin(accessToken, refreshToken, profile, done)
 
-                });
+
+              let newUser = await addNewUser(userData).catch(err => {
+                console.error(err);
+                newUser = await addNewUser(userData)
+
+
+              })
+              // = await User.query()
+              //   .allowInsert('[email, password, name, photo_url, is_verified]')
+              //   .insert(userData)
+              //   .returning('*').then(val => {
+              //     console.log(val)
+              //   }).catch(err => {
+              //     console.log("social signup error===", err)
+              //     processSocialLogin(accessToken, refreshToken, profile, done)
+
+              //   });
               return done(null, newUser);
 
             }).catch(async err => {
