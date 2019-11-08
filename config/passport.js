@@ -114,13 +114,7 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
                 name: profile.displayName,
                 is_verified: true
               })
-              .returning('*').then(val => {
-
-              }).catch(err => {
-                processSocialLogin(accessToken, refreshToken, profile, done)
-
-
-              });
+              .returning('*')
             return done(null, newUser);
           } catch (err) {
             console.error('user could not be added to db', err);
