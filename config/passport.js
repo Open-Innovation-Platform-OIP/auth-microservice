@@ -6,6 +6,11 @@ var crypto = require("crypto");
 const {
   User
 } = require('../db/schema');
+
+const userController = require('../controllers/user');
+
+
+
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var LinkedInStrategy = require('@sokratis/passport-linkedin-oauth2').Strategy;
 
@@ -18,6 +23,7 @@ passport.use(
       userVerification(email, password, done)
     }
   ));
+
 
 function userVerification(email, password, done) {
   User
@@ -58,7 +64,7 @@ function userVerification(email, password, done) {
 passport.use(new GoogleStrategy({
     clientID: "564870927448-d96u97cj6pcfui6l800sbhsbq6ab12kj.apps.googleusercontent.com",
     clientSecret: "uZey9Ql_8WFUlH-uRXpmBtnw",
-    callbackURL: "https://sa-auth-deploy.dev.jaagalabs.com/auth/google/callback",
+    callbackURL: "https://sa-auth-dev.dev.jaagalabs.com/auth/google/callback",
     accessType: 'offline',
     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
   },
@@ -70,7 +76,7 @@ passport.use(new GoogleStrategy({
 passport.use(new LinkedInStrategy({
     clientID: "81w4duzaa545xj",
     clientSecret: "wHaoduznJvmGqrhO",
-    callbackURL: "https://sa-auth-deploy.dev.jaagalabs.com/auth/linkedin/callback",
+    callbackURL: "https://sa-auth-dev.dev.jaagalabs.com/auth/linkedin/callback",
     scope: ['r_emailaddress', 'r_liteprofile'],
     state: true
   },
@@ -78,6 +84,15 @@ passport.use(new LinkedInStrategy({
     processSocialLogin(accessToken, refreshToken, profile, done)
   }
 ));
+
+
+function addNewUser(userData) {
+  return User.query()
+    .allowInsert('[email, password, name, photo_url, is_verified]')
+    .insert(userData)
+    .returning('*')
+
+}
 
 
 
@@ -105,23 +120,52 @@ function processSocialLogin(accessToken, refreshToken, profile, done) {
             }
 
             // }
-            const newUser = await User.query()
-              .allowInsert('[email, password, name, photo_url, is_verified]')
-              .insert({
-                email: profile.emails[0].value,
-                password: crypto.randomBytes(20).toString('hex'),
-                photo_url: JSON.stringify(photo_url),
-                name: profile.displayName,
-                is_verified: true
+            let userData = {
+              email: profile.emails[0].value,
+              password: crypto.randomBytes(20).toString('hex'),
+              photo_url: JSON.stringify(photo_url),
+              name: profile.displayName,
+              is_verified: true
+            }
+            userController.checkIfUserIsInvited(profile.emails[0].value).then(async val => {
+              if (val.admin_invited) {
+                userData.is_approved = true
+              }
+
+
+              let newUser = await addNewUser(userData).catch(async err => {
+                console.error(err);
+                newUser = await addNewUser(userData)
+
+
               })
-              .returning('*')
-            return done(null, newUser);
+              // = await User.query()
+              //   .allowInsert('[email, password, name, photo_url, is_verified]')
+              //   .insert(userData)
+              //   .returning('*').then(val => {
+              //     console.log(val)
+              //   }).catch(err => {
+              //     console.log("social signup error===", err)
+              //     processSocialLogin(accessToken, refreshToken, profile, done)
+
+              //   });
+              return done(null, newUser);
+
+            }).catch(async err => {
+              console.log(err)
+
+
+
+            })
+
+
+
           } catch (err) {
             console.error('user could not be added to db', err);
             return done(err, null);
           }
         } else {
-          if (!user.photo_url && !user.photo_url['url']) {
+          if (user && !user.photo_url && !user.photo_url['url']) {
             let photo_url;
             if (profile.photos && profile.photos[0]) {
 

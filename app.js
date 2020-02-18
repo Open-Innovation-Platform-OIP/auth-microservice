@@ -40,7 +40,11 @@ app.set('json spaces', 2); // number of spaces for indentation
 app.use(bodyParser.json());
 app.use(expressValidator());
 // required for passport
-app.use(session({ secret: 'socialalpha', resave: false, saveUninitialized: true, })); // session secret
+app.use(session({
+  secret: 'socialalpha',
+  resave: false,
+  saveUninitialized: true,
+})); // session secret
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(function (req, res, next) {
@@ -74,7 +78,7 @@ app.get('/auth/google/callback', userController.postGoogleLogin);
 app.get('/auth/linkedin',
   // Start OAuth 2 flow using Passport.js
   passport.authenticate('linkedin'),
-  function(req, res){
+  function (req, res) {
     // The request will be redirected to LinkedIn for authentication, so this
     // function will not be called.
   }
