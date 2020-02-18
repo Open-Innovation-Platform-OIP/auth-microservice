@@ -27,7 +27,7 @@ spec:
       - name: oip-auth
         image: socialalphaoip/auth-microservice:dev
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
         env:
           - name: ENCRYPTION_KEY
             value: KECbbhlLlqZaoJyqBARhbSwxkCHoTmTh
