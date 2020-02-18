@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: oip-auth
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: oip-auth
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oip-auth
+spec:
+  selector:
+    matchLabels:
+      app: oip-auth
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: oip-auth
+    spec:
+      containers:
+      - name: oip-auth
+        image: socialalphaoip/auth-microservice:dev
+        ports:
+        - containerPort: 3000
+        env:
+          - name: ENCRYPTION_KEY
+            value: KECbbhlLlqZaoJyqBARhbSwxkCHoTmTh
+          - name: DATABASE_URL
+            value: postgres://postgres:1SocialAlpha@165.22.220.53:3100/postgres
+---
