@@ -6,6 +6,9 @@ const {
   User
 } = require("../db/schema");
 const {
+  InvitedUsers
+} = require("../db/invited_users_schema");
+const {
   errorHandler
 } = require("../db/errors");
 const jwt = require("jsonwebtoken");
@@ -58,7 +61,7 @@ function generateOTP() {
   return OTP;
 }
 
-async function sendVerificationCode(req, res) {
+async function sendVerificationCode(req, res, adminInvited = false, isInviteeSignUp = false) {
   try {
     User.query()
       .where("email", req.body.email)
@@ -74,34 +77,58 @@ async function sendVerificationCode(req, res) {
             msg: "User is already verified"
           });
         }
-        const otp = generateOTP();
-        await User.query().patchAndFetchById(user.id, {
-          otp: otp
-        });
-        const mail = {
-          to: user.email,
-          subject: "Social Alpha Account Verification",
-          text: "Hello,\n\n" +
-            "Please use the following OTP to change your password: " +
-            otp +
-            ".\n"
-          // text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + 'social-alpha-open-innovation.firebaseapp.com' + '\/auth\/verify\/?email=' + user.email + '&otp=' + otp + '.\n'
-        };
-        const response = await sendMail(mail);
-        const msg = {
-          msg: "A verification email has been sent to " + user.email + "."
-        };
-        res.status(200).send(msg);
+
+        if (adminInvited && isInviteeSignUp) {
+          await User.query().patchAndFetchById(user.id, {
+            is_verified: true,
+            is_approved: true
+          });
+
+        } else if (!adminInvited && isInviteeSignUp) {
+          await User.query().patchAndFetchById(user.id, {
+            is_verified: true,
+            is_approved: false
+          });
+
+
+        }
+
+        if (!isInviteeSignUp) {
+
+          const otp = generateOTP();
+          await User.query().patchAndFetchById(user.id, {
+            otp: otp
+          });
+          const mail = {
+            to: user.email,
+            subject: "Social Alpha Account Verification",
+            text: "Hello,\n\n" +
+              "Please use the following OTP to change your password: " +
+              otp +
+              ".\n"
+            // text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + 'social-alpha-open-innovation.firebaseapp.com' + '\/auth\/verify\/?email=' + user.email + '&otp=' + otp + '.\n'
+          };
+          const response = await sendMail(mail);
+          const msg = {
+            msg: "A verification email has been sent to " + user.email + "."
+          };
+          res.status(200).send(msg);
+        }
       })
       .catch(function (err) {
         return res.status(500).send({
           msg: err.message
         });
       });
+
+
+
   } catch (err) {
     errorHandler(err, res);
     return;
   }
+
+
 }
 
 async function sendPasswordResetCode(req, res) {
@@ -145,50 +172,7 @@ async function sendPasswordResetCode(req, res) {
   }
 }
 
-function completeSocialLogin(err, user) {
-  let role = "user";
 
-  // console.log(err, user);
-  if (err) {
-    res.writeHead(302, {
-      'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?err=' + err
-    });
-    res.end();
-  }
-  if (user) {
-    if (user.is_admin) {
-      role = "admin";
-    }
-
-    console.log(user, "user");
-
-    // if (!user.is_approved) {
-    //   console.log(user, "user");
-
-    //   return handleResponse(res, 401, {
-    //     type: "not-approved",
-    //     msg: "Your account has not been approved by an admin."
-    //   });
-    // }
-
-    const tokenContents = {
-      sub: "" + user.id,
-      name: user.email,
-      iat: Date.now() / 1000,
-      "https://hasura.io/jwt/claims": {
-        "x-hasura-allowed-roles": ["editor", "user", "mod", "admin"],
-        "x-hasura-user-id": "" + user.id,
-        "x-hasura-default-role": role,
-        "x-hasura-role": role
-      }
-    };
-    const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
-    res.writeHead(302, {
-      'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
-    });
-    res.end();
-  }
-}
 
 /**
  * Sign in with Google
@@ -200,7 +184,7 @@ exports.postGoogleLogin = async (req, res, next) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?err=' + err
+        'Location': 'https://oip-dev.dev.jaagalabs.com/auth/login?err=' + err
       });
       res.end();
     }
@@ -211,15 +195,16 @@ exports.postGoogleLogin = async (req, res, next) => {
 
       // console.log(user, "user");
 
-      // if (!user.is_approved) {
-      //   // console.log(user, "user");
-      //   let error = "User is not approved";
+      if (!user.is_approved) {
+        // console.log(user, "user");
+        let error = "User is not approved";
+        console.log("test");
 
-      //   res.writeHead(302, {
-      //     Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
-      //   });
-      //   res.end();
-      // }
+        res.writeHead(302, {
+          Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
+        });
+        res.end();
+      }
 
       console.log(JSON.stringify(user));
       const tokenContents = {
@@ -235,7 +220,14 @@ exports.postGoogleLogin = async (req, res, next) => {
       };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
+          token +
+          "&email=" +
+          user.email +
+          "&id=" +
+          user.id +
+          "&role=" +
+          role
       });
       res.end();
     }
@@ -252,7 +244,7 @@ exports.postLinkedinLogin = async (req, res, next) => {
     // console.log(err, user);
     if (err) {
       res.writeHead(302, {
-        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?err=' + err
+        'Location': 'https://oip-dev.dev.jaagalabs.com/auth/login?err=' + err
       });
       res.end();
     }
@@ -263,15 +255,15 @@ exports.postLinkedinLogin = async (req, res, next) => {
 
       console.log(user, "user");
 
-      // if (!user.is_approved) {
-      //   console.log(user, "user");
-      //   let error = "User is not approved";
+      if (!user.is_approved) {
+        console.log(user, "user");
+        let error = "User is not approved";
 
-      //   res.writeHead(302, {
-      //     Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
-      //   });
-      //   res.end();
-      // }
+        res.writeHead(302, {
+          Location: "https://oip-dev.dev.jaagalabs.com/auth/login?err=" + error
+        });
+        res.end();
+      }
       console.log(JSON.stringify(user));
       const tokenContents = {
         sub: "" + user.id,
@@ -286,12 +278,61 @@ exports.postLinkedinLogin = async (req, res, next) => {
       };
       const token = jwt.sign(tokenContents, process.env.ENCRYPTION_KEY);
       res.writeHead(302, {
-        'Location': 'https://oip-demo.dev.jaagalabs.com/auth/login?token=' + token + '&email=' + user.email + '&id=' + user.id + '&role=' + role
+        Location: "https://oip-dev.dev.jaagalabs.com/auth/login?token=" +
+          token +
+          "&email=" +
+          user.email +
+          "&id=" +
+          user.id +
+          "&role=" +
+          role
       });
       res.end();
     }
   })(req, res, next);
 };
+
+async function checkIfUserIsInvited(email) {
+
+
+  let promise = new Promise((res, rej) => {
+
+    InvitedUsers
+      .query()
+      .where('email', email)
+      .first()
+      .then(async function (user) {
+        if (!user) {
+          // userIsInvited = false;
+          res(false)
+        } else {
+
+          await InvitedUsers.query().patchAndFetchById(user.id, {
+            accepted: true
+          });
+          // console.log("User exists", user)
+
+          // userIsInvited = true;
+          res(user)
+        }
+
+      }).catch(function (err) {
+        console.log(JSON.stringify(err), "random error")
+
+
+      });
+
+
+  });
+
+  result = await promise;
+  return result;
+
+
+
+
+
+}
 
 /**
  * POST /login
@@ -307,13 +348,18 @@ exports.postLogin = async (req, res, next) => {
   });
   const errors = req.validationErrors();
 
+  // queryTest("vishnu@jaaga.in");
+
+
+
+
   if (errors) {
     return res.status(400).json({
       errors: errors,
       test: "test"
-
     });
   }
+
 
   passport.authenticate("local", (err, user) => {
     if (err) {
@@ -328,14 +374,14 @@ exports.postLogin = async (req, res, next) => {
       });
     }
     console.log(user, "user 2");
-    // if (!user.is_approved) {
-    //   console.log(user, "user");
+    if (!user.is_approved) {
+      console.log(user, "user");
 
-    //   return handleResponse(res, 401, {
-    //     type: "not-approved",
-    //     msg: "Your account has not been approved by an admin."
-    //   });
-    // }
+      return handleResponse(res, 401, {
+        type: "not-approved",
+        msg: "Your account has not been approved by an admin."
+      });
+    }
     if (user) {
       if (user.is_admin) {
         role = "admin";
@@ -397,11 +443,13 @@ exports.postSignup = async (req, res, next) => {
       .insert({
         email: req.body.email,
         password: req.body.password,
-        name: req.body.name
+        name: req.body.name,
+        photo_url: {}
       }).then(val => {
+        console.log(val);
 
       }).catch(async err => {
-        console.log(err, "sign up error")
+        console.log("sign up error==", err)
         await User.query()
           .allowInsert("[email, password, name]")
           .insert({
@@ -416,8 +464,62 @@ exports.postSignup = async (req, res, next) => {
     errorHandler(err, res);
     return;
   }
+
+  // sendVerificationCode(req, res);
+
+
+  checkIfUserIsInvited(req.body.email).then(val => {
+    let adminInvited;
+
+    if (val) {
+      console.log(val, "user value invited")
+
+      // InvitedUsers.query().patchAndFetchById(val.id, {
+      //   accepted: true
+      // });
+
+      console.log(val);
+      if (val.admin_invited) {
+        sendVerificationCode(req, res, val.admin_invited, true);
+        adminInvited = true;
+
+
+      } else {
+        sendVerificationCode(req, res, false, true);
+        adminInvited = false;
+
+
+
+      }
+
+      return res.status(201).json({
+        "message": "User created",
+        "is_invited": true,
+        "admin_invited": adminInvited
+
+      });
+
+    } else {
+
+      sendVerificationCode(req, res);
+
+
+      res.status(201).json({
+        "message": "User created",
+        "is_invited": false
+
+      });
+    }
+
+
+  }).catch(err => {
+    console.log(err)
+  });
+
+
+
+  // console.log(userIsInvited, "user is invited");
   // Send the verification email
-  sendVerificationCode(req, res);
 };
 
 /**
@@ -620,3 +722,5 @@ exports.completeVerification = async (req, res, next) => {
 function handleResponse(res, code, statusMsg) {
   res.status(code).json(statusMsg);
 }
+
+module.exports.checkIfUserIsInvited = checkIfUserIsInvited;
