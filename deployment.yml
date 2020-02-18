@@ -1,36 +1,36 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: oip-auth
+  name: oip-auth-prod
 spec:
   ports:
   - port: 80
     targetPort: 8080
   selector:
-    app: oip-auth
+    app: oip-auth-prod
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: oip-auth
+  name: oip-auth-prod
 spec:
   selector:
     matchLabels:
-      app: oip-auth
+      app: oip-auth-prod
   replicas: 1
   template:
     metadata:
       labels:
-        app: oip-auth
+        app: oip-auth-prod
     spec:
       containers:
-      - name: oip-auth
-        image: socialalphaoip/auth-microservice:dev
+      - name: oip-auth-prod
+        image: socialalphaoip/auth-microservice:prod
         ports:
         - containerPort: 8080
         env:
           - name: ENCRYPTION_KEY
             value: KECbbhlLlqZaoJyqBARhbSwxkCHoTmTh
           - name: DATABASE_URL
-            value: postgres://postgres:1SocialAlpha@165.22.220.53:3100/postgres
+            value: postgres://postgres:1SocialAlpha@oip-postgres-prod:80/postgres
 ---
