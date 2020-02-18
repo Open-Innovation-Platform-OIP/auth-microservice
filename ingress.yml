@@ -1,19 +1,19 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: oip-auth-ingress
+  name: oip-auth-dev-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-staging"
 spec:
   tls:
   - hosts:
-    - oip-auth.k8s.jaagalabs.com
-    secretName: oip-auth-tls
+    - oip-auth-dev.k8s.jaagalabs.com
+    secretName: oip-auth-dev-tls
   rules:  
-  - host: oip-auth.k8s.jaagalabs.com
+  - host: oip-auth-dev.k8s.jaagalabs.com
     http:
       paths:
       - backend:
-          serviceName: oip-auth
+          serviceName: oip-auth-dev
           servicePort: 80
