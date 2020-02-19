@@ -8,10 +8,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - oip-auth-dev.k8s.jaagalabs.com
+    - oip-auth-dev.oip.dev.code-alpha.org
     secretName: oip-auth-dev-tls
   rules:  
-  - host: oip-auth-dev.k8s.jaagalabs.com
+  - host: oip-auth-dev.oip.dev.code-alpha.org
     http:
       paths:
       - backend:
