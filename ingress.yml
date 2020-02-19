@@ -9,7 +9,7 @@ spec:
   tls:
   - hosts:
     - oip-auth-prod.oip.dev.code-alpha.org
-    secretName: oip-auth-dev-tls
+    secretName: oip-auth-prod-tls
   rules:  
   - host: oip-auth-prod.oip.dev.code-alpha.org
     http:
